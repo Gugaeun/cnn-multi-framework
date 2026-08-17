@@ -1,4 +1,3 @@
-
 # CNN Multi-Framework: NumPy → PyTorch → Keras → ONNX → API
 
 동일한 CNN 이미지 분류 모델을 NumPy(밑바닥 구현), PyTorch, Keras(TensorFlow) 세 가지 방식으로 각각 구현하고, ONNX로 변환하여 프레임워크 간 상호운용성을 검증한 뒤, Flask와 FastAPI로 각각 서빙 API까지 구축한 프로젝트입니다.
@@ -24,7 +23,7 @@
 | Dense_1 | 64 units, ReLU | 64 | 262,208 |
 | Dense_2 (Output) | 10 units, Softmax | 10 | 650 |
 
-**Total: 319,178 parameters** (PyTorch/Keras 구현 기준. NumPy 버전은 연산 속도 문제로 필터 수를 축소한 경량 버전을 사용함 — `numpy_cifar10_train.py` 참고)
+**Total: 319,178 parameters** (PyTorch/Keras 구현 기준. NumPy 버전은 연산 속도 문제로 필터 수를 축소한 경량 버전을 사용함 — `Numpy_cnn_train.ipynb` 참고)
 
 Dataset: CIFAR-10 · Loss: Cross-Entropy · Optimizer: Adam (lr=0.001)
 
@@ -36,32 +35,30 @@ Dataset: CIFAR-10 · Loss: Cross-Entropy · Optimizer: Adam (lr=0.001)
 cnn-multi-framework/
 ├── README.md
 ├── cnn_architecture.svg
-├── numpy_cnn_layers.py          # NumPy Conv2D/MaxPool/Dense forward-backward 구현
-├── numpy_cifar10_train.py       # NumPy 모델로 CIFAR-10 학습
-├── pytorch_cnn_train.py         # PyTorch 구현 + 학습
-├── keras_cnn_train.py           # Keras 구현 + 학습 (fit / GradientTape 둘 다)
-├── onnx_convert_compare.py      # PyTorch → ONNX 변환 + 출력/속도 비교
-├── api/
-│   ├── model_loader.py          # ONNX 모델 로딩 + 추론 공통 유틸
-│   ├── main_fastapi.py          # FastAPI 서빙
-│   ├── main_flask.py            # Flask 서빙
-│   └── requirements.txt
-└── results/
-    ├── comparison_table.png     # (직접 채워 넣을 실험 결과)
-    └── training_curves.png
+├── Numpy_cnn_train.ipynb         # NumPy Conv2D/MaxPool/Dense 직접 구현 + CIFAR-10 학습
+├── Pytorch_cnn_train.ipynb       # PyTorch 구현 + 학습 + ONNX 변환/비교
+├── keras_cnn_train.ipynb         # Keras 구현 + 학습 (fit / GradientTape 둘 다)
+└── api/
+    ├── cnn_model.onnx            # 학습 완료된 ONNX 모델
+    ├── model_loader.py           # ONNX 모델 로딩 + 추론 공통 유틸
+    ├── main_fastapi.py           # FastAPI 서빙
+    ├── main_flask.py             # Flask 서빙
+    └── requirements.txt
 ```
 
 ## How to Run
 
 ### 1. 모델 학습 (Colab 권장 — GPU 무료 사용)
 
-```bash
-# 순서대로 실행
-numpy_cnn_layers.py      → numpy_cifar10_train.py
-pytorch_cnn_train.py     # cnn_pytorch.pth 저장됨
-keras_cnn_train.py       # cnn_keras.keras 저장됨
-onnx_convert_compare.py  # cnn_model.onnx 저장됨
+Colab에 아래 3개 노트북을 순서 상관없이 각각 열어서 위에서부터 순서대로 셀 실행하면 됩니다.
+
 ```
+Numpy_cnn_train.ipynb    # NumPy 레이어 구현 → CIFAR-10 서브셋 학습
+Pytorch_cnn_train.ipynb  # PyTorch로 전체 CIFAR-10 학습 → ONNX 변환 → PyTorch/ONNX 비교
+keras_cnn_train.ipynb    # Keras로 전체 CIFAR-10 학습
+```
+
+`Pytorch_cnn_train.ipynb` 실행이 끝나면 `cnn_model.onnx`가 생성됩니다 — 이 파일을 `api/` 폴더에 넣어야 서빙이 가능합니다 (이미 `api/cnn_model.onnx`로 포함되어 있음).
 
 ### 2. API 서버 실행
 
